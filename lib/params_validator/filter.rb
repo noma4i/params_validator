@@ -18,10 +18,11 @@ module ParamsValidator
     private
 
     def self.reserved_keys
-      @reserved_keys ||= [:_default, :_whitelist, :_with].to_set
+      @reserved_keys ||= [:_default, :_whitelist, :_with, :_param_key].to_set
     end
 
     def self.validate_field(field, params, validation_definition, errors)
+      param_key = validation_definition[:_param_key]
       validators = validation_definition[:_with]
       return errors unless validators
       validators.each do |validator_name|
@@ -29,10 +30,14 @@ module ParamsValidator
         begin
           validator = ParamsValidator::Validator.const_get(camelized_validator_name)
           validator = validator.new(validation_definition)
-          value = params.is_a?(Hash) ? params[field.to_s] : nil
+          value = params.is_a?(Hash) ? (param_key.nil? ? params[field.to_s] : params[param_key][field.to_s]) : nil
           unless validator.valid?(value)
             if validator.respond_to?(:default?) && validator.default?
-              params[field] = validator.default
+              if param_key.nil?
+                params[field] = validator.default
+              else
+                params[param_key][field] = validator.default
+              end
             else
               errors[field] = validator.error_message
             end
