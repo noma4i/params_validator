@@ -48,7 +48,7 @@ module ParamsValidator
 
     class TypeBoolean < Type
       def valid?(value)
-        super || to_bool(value) rescue false
+        super || is_bool(value) rescue false
       end
 
       def is_bool(value)
