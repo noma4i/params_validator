@@ -17,7 +17,7 @@ module ParamsValidator
           sanitized_params = Filter.sanitize_params(params, definition)
           request.parameters.merge!(sanitized_params)
         end
-        self.before_filter action_filter_name, :only => action
+        self.before_action action_filter_name, :only => action
       end
     end
   end
